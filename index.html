@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이메일 서명 생성기</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    }
+    body {
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      display: flex;
+      gap: 30px;
+      max-width: 1000px;
+      width: 100%;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .form-section, .preview-section {
+      flex: 1;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #111;
+      border-bottom: 2px solid #111;
+      padding-bottom: 8px;
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: bold;
+      color: #444;
+      margin-bottom: 4px;
+    }
+    input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 13px;
+    }
+    input:focus {
+      outline: none;
+      border-color: #000;
+    }
+    .btn-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-copy-rich {
+      background-color: #000;
+      color: #fff;
+    }
+    .btn-copy-rich:hover {
+      background-color: #222;
+    }
+    .btn-copy-html {
+      background-color: #e5e7eb;
+      color: #374151;
+    }
+    .btn-copy-html:hover {
+      background-color: #d1d5db;
+    }
+    .preview-box {
+      border: 1px dashed #bbb;
+      padding: 25px;
+      background: #fff;
+      border-radius: 6px;
+      min-height: 250px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 입력 폼 -->
+  <div class="form-section">
+    <h2>서명 정보 입력</h2>
+    <div class="form-group">
+      <label>로고 URL (선택사항, 없으면 비워두세요)</label>
+      <input type="text" id="logoUrl" value="https://d331zgwg6mi8nv.cloudfront.net/cafe24/videos/2026/09/positivehotel_logo.jpg">
+    </div>
+    <div class="form-group">
+      <label>이름 (한글)</label>
+      <input type="text" id="nameKo" value="김긍정">
+    </div>
+    <div class="form-group">
+      <label>이름 (영문)</label>
+      <input type="text" id="nameEn" value="KIM POSITIVE">
+    </div>
+    <div class="form-group">
+      <label>부서/직급 (한글)</label>
+      <input type="text" id="roleKo" value="관리팀">
+    </div>
+    <div class="form-group">
+      <label>부서/직급 (영문)</label>
+      <input type="text" id="roleEn" value="MANAGEMENT TEAM">
+    </div>
+    <div class="form-group">
+      <label>전화번호</label>
+      <input type="text" id="phone" value="+82 10 0000 0000">
+    </div>
+    <div class="form-group">
+      <label>이메일 아이디 (소문자)</label>
+      <input type="text" id="emailUser" value="POSITIVE">
+    </div>
+    <div class="form-group">
+      <label>이메일 도메인 (대문자)</label>
+      <input type="text" id="emailDomain" value="POSITIVEHOTEL.COM">
+    </div>
+    <div class="form-group">
+      <label>주소</label>
+      <input type="text" id="address" value="6F, 311, DOSAN-DAERO, GANGNAM-GU, SEOUL">
+    </div>
+  </div>
+
+  <!-- 미리보기 및 복사 -->
+  <div class="preview-section">
+    <h2>실시간 미리보기</h2>
+    <div class="preview-box" id="signaturePreview">
+      
+      <!-- [서명 HTML 핵심] -->
+      <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; font-size: 10px; line-height: 1.45; color: #111111;">
+        <!-- 로고 영역 (입력 시만 출력) -->
+        <tr id="logoRow">
+          <td style="padding-bottom: 10px;">
+            <img id="outLogo" src="https://d331zgwg6mi8nv.cloudfront.net/cafe24/videos/2026/09/positivehotel_logo.jpg" style="display: block; height: 13px; border: 0;" alt="Logo">
+          </td>
+        </tr>
+        
+        <!-- 1행: 이름 -->
+        <tr>
+          <td style="padding-bottom: 4px;">
+            <span style="font-weight: bold; color: #333333;">
+              <span id="outNameKo">김긍정</span>
+              <span style="margin: 0 4px; font-weight: normal; color: #333333;">|</span>
+              <span id="outNameEn" style="text-transform: uppercase;">KIM POSITIVE</span>
+            </span>
+          </td>
+        </tr>
+
+        <!-- 2행: 부서/직급 -->
+        <tr>
+          <td style="padding-bottom: 6px;">
+            <span style="font-weight: bold; color: #333333;">
+              <span id="outRoleKo">관리팀</span>
+              <span style="margin: 0 4px; font-weight: normal; color: #333333;">|</span>
+              <span id="outRoleEn" style="text-transform: uppercase;">MANAGEMENT TEAM</span>
+            </span>
+          </td>
+        </tr>
+
+        <!-- 3행: 전화번호 -->
+        <tr>
+          <td style="padding-bottom: 4px;">
+            <a id="outPhoneLink" href="tel:+821000000000" style="color: #3b82f6; text-decoration: none; font-weight: 500;">
+              <span id="outPhone">+82 10 0000 0000</span>
+            </a>
+          </td>
+        </tr>
+
+        <!-- 4행: 이메일 (아이디 소문자 + 도메인 대문자) -->
+        <tr>
+          <td style="padding-bottom: 6px;">
+            <a id="outEmailLink" href="mailto:yjjang@POSITIVEHOTEL.COM" style="color: #3b82f6; text-decoration: none; font-weight: 500;">
+              <span id="outEmailUser" style="text-transform: lowercase;">POSITIVE</span>@<span id="outEmailDomain" style="text-transform: uppercase;">POSITIVEHOTEL.COM</span>
+            </a>
+          </td>
+        </tr>
+
+        <!-- 5행: 주소 -->
+        <tr>
+          <td>
+            <span id="outAddress" style="color: #222222; font-weight: normal; text-transform: uppercase; letter-spacing: -0.1px;">6F, 311, DOSAN-DAERO, GANGNAM-GU, SEOUL</span>
+          </td>
+        </tr>
+      </table>
+
+    </div>
+
+    <div class="btn-container">
+      <button class="btn-copy-rich" onclick="copyRichText()">서명 복사 (메일 붙여넣기용)</button>
+      <button class="btn-copy-html" onclick="copyHTML()">HTML 복사</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const inputs = {
+    logoUrl: document.getElementById('logoUrl'),
+    nameKo: document.getElementById('nameKo'),
+    nameEn: document.getElementById('nameEn'),
+    roleKo: document.getElementById('roleKo'),
+    roleEn: document.getElementById('roleEn'),
+    phone: document.getElementById('phone'),
+    emailUser: document.getElementById('emailUser'),
+    emailDomain: document.getElementById('emailDomain'),
+    address: document.getElementById('address')
+  };
+
+  function updateSignature() {
+    // 로고 세팅
+    const logoRow = document.getElementById('logoRow');
+    const outLogo = document.getElementById('outLogo');
+    if (inputs.logoUrl.value.trim() === '') {
+      logoRow.style.display = 'none';
+    } else {
+      logoRow.style.display = 'table-row';
+      outLogo.src = inputs.logoUrl.value;
+    }
+
+    // 텍스트 반영
+    document.getElementById('outNameKo').innerText = inputs.nameKo.value;
+    document.getElementById('outNameEn').innerText = inputs.nameEn.value;
+    document.getElementById('outRoleKo').innerText = inputs.roleKo.value;
+    document.getElementById('outRoleEn').innerText = inputs.roleEn.value;
+    
+    // 전화번호
+    document.getElementById('outPhone').innerText = inputs.phone.value;
+    document.getElementById('outPhoneLink').href = 'tel:' + inputs.phone.value.replace(/\s+/g, '');
+
+    // 이메일
+    document.getElementById('outEmailUser').innerText = inputs.emailUser.value;
+    document.getElementById('outEmailDomain').innerText = inputs.emailDomain.value;
+    document.getElementById('outEmailLink').href = `mailto:${inputs.emailUser.value}@${inputs.emailDomain.value}`;
+
+    // 주소
+    document.getElementById('outAddress').innerText = inputs.address.value;
+  }
+
+  Object.values(inputs).forEach(input => input.addEventListener('input', updateSignature));
+
+  function copyRichText() {
+    const previewBox = document.getElementById('signaturePreview');
+    const range = document.createRange();
+    range.selectNode(previewBox);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    
+    try {
+      document.execCommand('copy');
+      alert('서명이 클립보드에 복사되었습니다!\nGmail/Outlook 설정의 서명란에 붙여넣으세요.');
+    } catch (err) {
+      alert('복사 실패');
+    }
+    window.getSelection().removeAllRanges();
+  }
+
+  function copyHTML() {
+    const htmlContent = document.getElementById('signaturePreview').innerHTML.trim();
+    navigator.clipboard.writeText(htmlContent).then(() => {
+      alert('HTML 코드가 복사되었습니다.');
+    });
+  }
+</script>
+
+</body>
+</html>
