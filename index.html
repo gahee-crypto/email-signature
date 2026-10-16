@@ -143,7 +143,7 @@
     <div class="preview-box" id="signaturePreview">
       
       <!-- [서명 HTML 핵심] -->
-      <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; font-size: 10px; line-height: 1.45; color: #111111;">
+     <table id="signatureTable" cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; font-size: 10px; line-height: 1.45; color: #111111;">
         <!-- 로고 영역 (입력 시만 출력) -->
         <tr id="logoRow">
           <td style="padding-bottom: 10px;">
@@ -253,29 +253,46 @@
 
   Object.values(inputs).forEach(input => input.addEventListener('input', updateSignature));
 
-  function copyRichText() {
-    const previewBox = document.getElementById('signaturePreview');
-    const range = document.createRange();
-    range.selectNode(previewBox);
-    window.getSelection().removeAllRanges();
-    window.getSelection().addRange(range);
-    
+  // 복사용 서명 HTML 생성 (표만, 숨긴 로고 행 제거, id 정리)
+  function getSignatureHTML() {
+    const clone = document.getElementById('signatureTable').cloneNode(true);
+    const logoRow = clone.querySelector('#logoRow');
+    if (logoRow && logoRow.style.display === 'none') logoRow.remove();
+    clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+    return clone.outerHTML;
+  }
+
+  async function copyRichText() {
+    const html = getSignatureHTML();
+    const text = document.getElementById('signatureTable').innerText;
     try {
-      document.execCommand('copy');
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/plain': new Blob([text], { type: 'text/plain' })
+        })
+      ]);
       alert('서명이 클립보드에 복사되었습니다!\nGmail/Outlook 설정의 서명란에 붙여넣으세요.');
     } catch (err) {
-      alert('복사 실패');
+      // 구형 브라우저 대비: 표만 선택해서 복사
+      const range = document.createRange();
+      range.selectNode(document.getElementById('signatureTable'));
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      document.execCommand('copy') ? alert('서명이 클립보드에 복사되었습니다!') : alert('복사 실패');
+      sel.removeAllRanges();
     }
-    window.getSelection().removeAllRanges();
   }
 
   function copyHTML() {
-    const htmlContent = document.getElementById('signaturePreview').innerHTML.trim();
-    navigator.clipboard.writeText(htmlContent).then(() => {
+    navigator.clipboard.writeText(getSignatureHTML()).then(() => {
       alert('HTML 코드가 복사되었습니다.');
     });
   }
-</script>
 
+  // 처음 열었을 때도 입력값이 서명에 반영되도록
+  updateSignature();
+</script>
 </body>
 </html>
